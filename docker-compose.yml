@@ -1,0 +1,13 @@
+dht:
+  hostname: dht
+  devices:
+    - "/dev/ttyAMA0:/dev/ttyAMA0"
+    - "/dev/mem:/dev/mem"
+  environment:
+    - GPIO_PIN=04
+    - ES_HOST=51.15.35.229
+  privileged: true
+  volumes:
+    - /etc/localtime:/etc/localtime:ro
+  tty: true
+  image: dht:rc
