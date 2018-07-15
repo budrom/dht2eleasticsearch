@@ -8,7 +8,7 @@ curl -XPUT "${ES_HOST}:9200/_template/metrics?pretty" -H 'Content-Type: applicat
     "number_of_replicas": 0
   },
   "mappings": {
-    "dht": {
+    "measurement": {
       "_source": {
         "enabled": true
       },
@@ -18,7 +18,16 @@ curl -XPUT "${ES_HOST}:9200/_template/metrics?pretty" -H 'Content-Type: applicat
         },
         "humidity": {
           "type": "half_float"
-        }
+        },
+        "pressure": {
+	  "type": "half_float"
+	},
+        "co2": {
+	  "type": "integer"
+	},
+	"uncertainty": {
+	  "type": "half_float"
+	}
       }
     }
   }

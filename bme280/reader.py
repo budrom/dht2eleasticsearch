@@ -18,7 +18,7 @@ def readSensor():
   pressure = pascals / 100 * 0.75006375541921
   humidity = sensor.read_humidity()
 
-  report = { "timestamp": timestamp, "temperature": degrees, "humidity": humidity, "pressure": pressure }
+  report = { 'timestamp': timestamp, 'sensor': 'bme280', 'temperature': degrees, 'humidity': humidity, 'pressure': pressure }
   if es_host:
     send2es(report)
   else:
@@ -30,20 +30,19 @@ def send2es(data):
   """
 
   i = 'metrics_{}'.format(datetime.now().strftime('%m.%y'))
-  es.index(index=i, doc_type='bme280', body=data)
+  es.index(index=i, doc_type='measurement', body=data)
 
 if __name__ == "__main__":
 
   print("Script started")
 
   try:
-    es_host = os.environ['ES_HOST']
+    es_host = os.environ['ELASTICSEARCH_URL']
+    es_user = os.environ['ELASTICSEARCH_USER']
+    es_pass = os.environ['ELASTICSEARCH_PASSWORD']
+    es = Elasticsearch(es_host, http_auth=(es_user, es_pass))
   except KeyError:
     es_host = None
-  try:
-    es_port = int(os.environ['ES_PORT'])
-  except KeyError:
-    es_port = 9200
   try:
     t_compensation = float(os.environ['T_COMPENSATION'])
   except KeyError:
@@ -55,7 +54,5 @@ if __name__ == "__main__":
                   filter=BME280_FILTER_16, 
                   address=0x76)
 
-  if es_host:
-    es = Elasticsearch([ { 'host': es_host, 'port': es_port } ])
   threading.Timer(60-float(datetime.utcnow().strftime('%S.%f')), readSensor).start()
   print("Waiting for next minute to start loop...")

@@ -55,7 +55,11 @@ def readSensor():
 
   ppm, T, S = read_mh_z19()
 
-  report = { "timestamp": timestamp, "co2": ppm, "uncertainty": S }
+  if ppm > 3000:
+    print('CO2 ppm is wrong!')
+    os._exit(1)
+
+  report = { 'timestamp': timestamp, 'sensor': 'mh-z19', 'co2': ppm, 'uncertainty': S }
   if es_host:
     send2es(report)
   print("Time UTC: {}\tco2={}\tuncertainty={}".format(timestamp, ppm, S))
@@ -66,20 +70,19 @@ def send2es(data):
   """
 
   i = 'metrics_{}'.format(datetime.now().strftime('%m.%y'))
-  es.index(index=i, doc_type='mh-z19', body=data)
+  es.index(index=i, doc_type='measurement', body=data)
 
 if __name__ == "__main__":
 
   print("Script started")
 
   try:
-    es_host = os.environ['ES_HOST']
+    es_host = os.environ['ELASTICSEARCH_URL']
+    es_user = os.environ['ELASTICSEARCH_USER']
+    es_pass = os.environ['ELASTICSEARCH_PASSWORD']
+    es = Elasticsearch(es_host, http_auth=(es_user, es_pass))
   except KeyError:
     es_host = None
-  try:
-    es_port = int(os.environ['ES_PORT'])
-  except KeyError:
-    es_port = 9200
 
   sensor = serial.Serial('/dev/ttyAMA0',
                           baudrate=9600,
@@ -88,7 +91,5 @@ if __name__ == "__main__":
                           stopbits=serial.STOPBITS_ONE,
                           timeout=1.0)
 
-  if es_host:
-    es = Elasticsearch([ { 'host': es_host, 'port': es_port } ])
   threading.Timer(60-float(datetime.utcnow().strftime('%S.%f')), readSensor).start()
   print("Waiting for next minute to start loop...")

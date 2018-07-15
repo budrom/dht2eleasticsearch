@@ -1,35 +1,41 @@
-dht:
-  hostname: dht
-  devices:
-    - "/dev/ttyAMA0:/dev/ttyAMA0"
-    - "/dev/mem:/dev/mem"
-  environment:
-    - GPIO_PINS=20,26
-    - ES_HOST=127.0.0.1
-  privileged: true
-  volumes:
-    - /etc/localtime:/etc/localtime:ro
-  tty: true
-  image: dht:array
-mhz19:
+#dht:
+#  hostname: dht
+#  devices:
+#    - "/dev/ttyAMA0:/dev/ttyAMA0"
+#    - "/dev/mem:/dev/mem"
+#  environment:
+#    - GPIO_PINS=20,26
+#    - ES_HOST=127.0.0.1
+#  privileged: true
+#  volumes:
+#    - /etc/localtime:/etc/localtime:ro
+#  tty: true
+#  image: dht:array
+mhz:
   hostname: mhz19
+  container_name: mhz
   devices:
     - "/dev/ttyAMA0:/dev/ttyAMA0"
   privileged: true
   environment:
-    - ES_HOST=127.0.0.1
+    - ELASTICSEARCH_URL
+    - ELASTICSEARCH_USER
+    - ELASTICSEARCH_PASSWORD
   volumes:
     - /etc/localtime:/etc/localtime:ro
   image: budrom/rpi-sensors:mh-z19
-bme280:
+bme:
   hostname: bme280
+  container_name: bme
   devices:
     - "/dev/ttyAMA0:/dev/ttyAMA0"
     - "/dev/mem:/dev/mem"
     - "/dev/i2c-1:/dev/i2c-1"
   environment:
-    - ES_HOST=127.0.0.1
-    - T_COMPENSATION=-1.5
+    - ELASTICSEARCH_URL
+    - ELASTICSEARCH_USER
+    - ELASTICSEARCH_PASSWORD
+    - T_COMPENSATION
   volumes:
     - /etc/localtime:/etc/localtime:ro
   image: budrom/rpi-sensors:bme280
